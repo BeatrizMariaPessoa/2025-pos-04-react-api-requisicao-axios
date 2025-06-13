@@ -1,11 +1,17 @@
 "use client";
 import type React from "react";
+import axios from 'axios'
 
 import { useEffect, useState } from "react";
-import dados, { TarefaInterface } from "@/data";
+// import dados, { TarefaInterface } from "@/data";
 import Cabecalho from "@/componentes/Cabecalho";
 import ModalTarefa from "@/componentes/ModalTarefa";
 
+export interface TarefaInterface {
+  id: number;
+  title: string;
+  completed: boolean;
+}
 
 interface TarefaProps {
   titulo: string;
@@ -45,9 +51,9 @@ interface TareafasProps {
 const Tarefas: React.FC<TareafasProps> = ({ dados }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {dados.map((tarefa) => (
+      {dados.map((tarefa, idx) => (
         <Tarefa
-          key={tarefa.id}
+          key={`${tarefa.id}-${idx}`}
           titulo={tarefa.title}
           concluido={tarefa.completed}
         />
@@ -58,7 +64,46 @@ const Tarefas: React.FC<TareafasProps> = ({ dados }) => {
 
 const Home = () => {
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [tarefas, setTarefas] = useState<TarefaInterface[]>(dados)
+  const [tarefas, setTarefas] = useState<TarefaInterface[]>([])
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const feachTarefas = async () => {
+      try {
+        const response = await axios.get('https://dummyjson.com/todos')
+        const tarefasAPI = response.data.todos.map((t: any) => ({
+          id: t.id,
+          title: t.todo,
+          completed: t.completed,
+        }));
+        setTarefas(tarefasAPI);
+      } catch (err) {
+        setError('Failed to fetch todos')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    feachTarefas()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-red-500 text-xl">{error}</div>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto p-4">

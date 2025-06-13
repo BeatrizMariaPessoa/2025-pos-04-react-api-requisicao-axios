@@ -19,6 +19,13 @@ const Home = () => {
           Tarefas
         </button>
       </Link>
+      <Link href="/todos">
+        <button className="mb-1 bg-gray-600 cursor-pointer text-white p-2 font-semibold rounded-lg m-1">
+          Todos
+        </button>
+      </Link>
+
+      
     </div>
   );
 };
